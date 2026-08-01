@@ -64,12 +64,14 @@ const pageTitle = document.querySelector("#pageTitle");
 const pageText = document.querySelector("#pageText");
 const taskLine = document.querySelector("#taskLine");
 const popArea = document.querySelector("#popArea");
+const book = document.querySelector(".book");
 const prevButton = document.querySelector("#prevButton");
 const nextButton = document.querySelector("#nextButton");
 const dots = document.querySelector("#dots");
 
 let currentPage = 0;
 let progress = 0;
+let isTurning = false;
 
 pageTotal.textContent = pages.length;
 
@@ -85,8 +87,35 @@ pages.forEach((page, index) => {
 prevButton.addEventListener("click", () => showPage(currentPage - 1));
 nextButton.addEventListener("click", () => showPage(currentPage + 1));
 
-function showPage(index) {
-  currentPage = Math.max(0, Math.min(index, pages.length - 1));
+function showPage(index, animate = true) {
+  const targetPage = Math.max(0, Math.min(index, pages.length - 1));
+  if (targetPage === currentPage || isTurning) return;
+
+  const direction = targetPage > currentPage ? "next" : "prev";
+  if (!animate) {
+    renderPage(targetPage);
+    return;
+  }
+
+  isTurning = true;
+  setNavigationLocked(true);
+  book.classList.add(`turning-out-${direction}`);
+
+  window.setTimeout(() => {
+    renderPage(targetPage);
+    book.classList.remove(`turning-out-${direction}`);
+    book.classList.add(`turning-in-${direction}`);
+
+    window.setTimeout(() => {
+      book.classList.remove(`turning-in-${direction}`);
+      isTurning = false;
+      updateNavigation();
+    }, 430);
+  }, 230);
+}
+
+function renderPage(index) {
+  currentPage = index;
   progress = 0;
   const page = pages[currentPage];
 
@@ -96,10 +125,6 @@ function showPage(index) {
   pageText.textContent = page.text;
   taskLine.textContent = page.task;
 
-  prevButton.disabled = currentPage === 0;
-  nextButton.disabled = currentPage === pages.length - 1;
-  nextButton.textContent = currentPage === pages.length - 1 ? "The End" : "Next";
-
   document.querySelectorAll(".dot").forEach((dot, dotIndex) => {
     dot.classList.toggle("active", dotIndex === currentPage);
   });
@@ -107,6 +132,26 @@ function showPage(index) {
   popArea.className = "pop-area";
   popArea.replaceChildren();
   renderInteraction(page.type);
+  updateNavigation();
+}
+
+function updateNavigation() {
+  prevButton.disabled = isTurning || currentPage === 0;
+  nextButton.disabled = isTurning || currentPage === pages.length - 1;
+  nextButton.textContent = currentPage === pages.length - 1 ? "The End" : "Next";
+
+  document.querySelectorAll(".dot").forEach((dot) => {
+    dot.disabled = isTurning;
+  });
+}
+
+function setNavigationLocked(locked) {
+  prevButton.disabled = locked;
+  nextButton.disabled = locked;
+
+  document.querySelectorAll(".dot").forEach((dot) => {
+    dot.disabled = locked;
+  });
 }
 
 function makeGroundScene() {
@@ -331,4 +376,4 @@ function renderFinish() {
   popArea.appendChild(card);
 }
 
-showPage(0);
+renderPage(0);

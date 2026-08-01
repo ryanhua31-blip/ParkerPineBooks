@@ -87,6 +87,49 @@ h1 {
   overflow: hidden;
   background: var(--paper);
   box-shadow: 10px 10px 0 var(--shadow);
+  transform-origin: center;
+}
+
+.book.turning-out-next,
+.book.turning-out-prev {
+  animation: bookBounceOut 230ms ease both;
+}
+
+.book.turning-in-next,
+.book.turning-in-prev {
+  animation: bookBounceIn 430ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.book.turning-out-next .page-panel {
+  animation: pageTextOutNext 230ms ease both;
+}
+
+.book.turning-in-next .page-panel {
+  animation: pageTextInNext 430ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.book.turning-out-prev .page-panel {
+  animation: pageTextOutPrev 230ms ease both;
+}
+
+.book.turning-in-prev .page-panel {
+  animation: pageTextInPrev 430ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.book.turning-out-next .pop-area {
+  animation: sceneOutNext 230ms ease both;
+}
+
+.book.turning-in-next .pop-area {
+  animation: sceneInNext 430ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.book.turning-out-prev .pop-area {
+  animation: sceneOutPrev 230ms ease both;
+}
+
+.book.turning-in-prev .pop-area {
+  animation: sceneInPrev 430ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .page-panel {
@@ -507,6 +550,119 @@ h2 {
   background: var(--gold);
 }
 
+.dot:disabled {
+  cursor: wait;
+}
+
+@keyframes bookBounceOut {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    transform: translateY(4px) scale(0.992);
+  }
+}
+
+@keyframes bookBounceIn {
+  0% {
+    transform: translateY(4px) scale(0.992);
+  }
+  70% {
+    transform: translateY(-3px) scale(1.004);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pageTextOutNext {
+  0% {
+    opacity: 1;
+    transform: translateX(0) rotateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-32px) rotateY(-12deg);
+  }
+}
+
+@keyframes pageTextInNext {
+  0% {
+    opacity: 0;
+    transform: translateX(38px) rotateY(12deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) rotateY(0);
+  }
+}
+
+@keyframes pageTextOutPrev {
+  0% {
+    opacity: 1;
+    transform: translateX(0) rotateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(32px) rotateY(12deg);
+  }
+}
+
+@keyframes pageTextInPrev {
+  0% {
+    opacity: 0;
+    transform: translateX(-38px) rotateY(-12deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) rotateY(0);
+  }
+}
+
+@keyframes sceneOutNext {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-42px) scale(0.96);
+  }
+}
+
+@keyframes sceneInNext {
+  0% {
+    opacity: 0;
+    transform: translateX(54px) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes sceneOutPrev {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(42px) scale(0.96);
+  }
+}
+
+@keyframes sceneInPrev {
+  0% {
+    opacity: 0;
+    transform: translateX(-54px) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
 @keyframes pop {
   0% {
     transform: scale(0.7);
@@ -591,5 +747,15 @@ h2 {
 
   .nav-button {
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
   }
 }
