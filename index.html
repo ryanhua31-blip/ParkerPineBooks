@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Parker & Pine Books</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar" aria-label="Parker and Pine Books">
+        <div>
+          <p class="library-label">Parker & Pine Books</p>
+          <h1>Johnny Builds to Mars</h1>
+        </div>
+        <div class="page-counter" aria-live="polite">
+          Page <span id="pageNumber">1</span> of <span id="pageTotal">8</span>
+        </div>
+      </header>
+
+      <section class="book" aria-label="Interactive storybook">
+        <article class="page-panel">
+          <div class="storybook-tag" id="pageTag">Garage Plan</div>
+          <h2 id="pageTitle">Johnny Had a Big Idea</h2>
+          <p id="pageText"></p>
+          <p class="task-line" id="taskLine"></p>
+        </article>
+
+        <section class="pop-area" id="popArea" aria-label="Story interaction"></section>
+      </section>
+
+      <nav class="book-nav" aria-label="Story pages">
+        <button class="nav-button" id="prevButton" type="button">Back</button>
+        <div class="dots" id="dots" aria-label="Page picker"></div>
+        <button class="nav-button primary" id="nextButton" type="button">Next</button>
+      </nav>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
