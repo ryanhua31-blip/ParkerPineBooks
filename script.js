@@ -339,7 +339,7 @@ function renderPlanets() {
     planet.style.width = size;
     planet.style.height = size;
     planet.style.background = color;
-    planet.style.fontWeight = "900";
+    planet.style.fontWeight = "800";
     planet.style.color = isMars ? "white" : "#273044";
     planet.addEventListener("click", () => {
       planet.classList.add("spin");
