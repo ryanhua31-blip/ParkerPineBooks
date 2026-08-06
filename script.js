@@ -154,7 +154,60 @@ function setNavigationLocked(locked) {
   });
 }
 
+function addElement(className, parent = popArea) {
+  const element = document.createElement("div");
+  element.className = className;
+  parent.appendChild(element);
+  return element;
+}
+
+function addAmbientSky() {
+  addElement("sun");
+  ["small", "medium", "large"].forEach((size, index) => {
+    const cloud = addElement(`cloud ${size}`);
+    cloud.style.setProperty("--cloud-top", `${10 + index * 15}%`);
+    cloud.style.setProperty("--cloud-delay", `${index * -5}s`);
+  });
+}
+
+function addSparkles(count, theme = "gold") {
+  for (let index = 0; index < count; index += 1) {
+    const sparkle = addElement(`sparkle ${theme}`);
+    sparkle.style.left = `${8 + ((index * 29) % 84)}%`;
+    sparkle.style.top = `${8 + ((index * 41) % 78)}%`;
+    sparkle.style.setProperty("--sparkle-delay", `${index * 0.22}s`);
+  }
+}
+
+function addClickBurst(x, y, theme = "gold") {
+  for (let index = 0; index < 8; index += 1) {
+    const bit = addElement(`burst-bit ${theme}`);
+    bit.style.left = x;
+    bit.style.top = y;
+    bit.style.setProperty("--angle", `${index * 45}deg`);
+  }
+}
+
+function addSmokePuffs(count, bottom = "16%") {
+  for (let index = 0; index < count; index += 1) {
+    const puff = addElement("smoke-puff");
+    puff.style.left = `${34 + index * 6}%`;
+    puff.style.bottom = bottom;
+    puff.style.setProperty("--puff-delay", `${index * 0.08}s`);
+  }
+}
+
+function addBubbles(count) {
+  for (let index = 0; index < count; index += 1) {
+    const bubble = addElement("fizz-bubble");
+    bubble.style.left = `${18 + ((index * 17) % 64)}%`;
+    bubble.style.bottom = `${16 + ((index * 11) % 22)}%`;
+    bubble.style.setProperty("--bubble-delay", `${index * 0.18}s`);
+  }
+}
+
 function makeGroundScene() {
+  addAmbientSky();
   const ground = document.createElement("div");
   ground.className = "ground";
   popArea.appendChild(ground);
@@ -164,8 +217,9 @@ function makeGarage() {
   makeGroundScene();
   const garage = document.createElement("div");
   garage.className = "garage";
-  garage.innerHTML = '<div class="garage-door"></div>';
+  garage.innerHTML = '<div class="garage-light"></div><div class="garage-door"></div>';
   popArea.appendChild(garage);
+  return garage;
 }
 
 function makeToy(label, x, y, action) {
@@ -219,6 +273,9 @@ function renderInteraction(type) {
 
 function renderTools() {
   makeGarage();
+  addSparkles(8, "mint");
+  const blueprint = addElement("blueprint");
+  blueprint.innerHTML = "<span>Mars plan</span><i></i><i></i><i></i>";
   ["Wrench", "Tape", "Crayon"].forEach((label, index) => {
     const positions = [
       ["12%", "70%"],
@@ -228,6 +285,7 @@ function renderTools() {
     makeToy(label, positions[index][0], positions[index][1], (event) => {
       if (event.currentTarget.classList.contains("done")) return;
       event.currentTarget.classList.add("done");
+      addClickBurst(positions[index][0], positions[index][1], "mint");
       progress += 1;
       if (progress === 3) celebrate("Blueprint ready!");
     });
@@ -236,7 +294,10 @@ function renderTools() {
 
 function renderBuild() {
   makeGarage();
-  makeRocket();
+  addSparkles(10, "gold");
+  const blueprint = addElement("rocket-blueprint");
+  blueprint.innerHTML = "<span></span><span></span><span></span>";
+  const rocket = makeRocket();
   const parts = [
     ["Nose", "10%", "22%"],
     ["Window", "75%", "24%"],
@@ -248,6 +309,9 @@ function renderBuild() {
       if (event.currentTarget.classList.contains("done")) return;
       event.currentTarget.classList.add("done");
       event.currentTarget.classList.add("placed");
+      rocket.classList.add("jiggle");
+      window.setTimeout(() => rocket.classList.remove("jiggle"), 320);
+      addClickBurst(x, y, "gold");
       progress += 1;
       if (progress === parts.length) celebrate("Rocket Number One!");
     });
@@ -257,6 +321,8 @@ function renderBuild() {
 function renderFuel() {
   makeGroundScene();
   const rocket = makeRocket();
+  rocket.classList.add("idle-rumble");
+  addBubbles(14);
   const meter = document.createElement("div");
   meter.className = "meter";
   meter.innerHTML = '<div class="meter-fill"></div>';
@@ -270,29 +336,47 @@ function renderFuel() {
     progress = Math.min(progress + 20, 100);
     meter.querySelector(".meter-fill").style.setProperty("--fill", `${progress}%`);
     rocket.style.setProperty("--flame", `${0.25 + progress / 130}`);
+    meter.classList.add("meter-bump");
+    window.setTimeout(() => meter.classList.remove("meter-bump"), 260);
+    addClickBurst("50%", "78%", progress === 100 ? "coral" : "mint");
     rocket.classList.toggle("lift", progress === 100);
-    if (progress === 100) celebrate("Fizz fuel full!");
+    if (progress === 100) {
+      rocket.classList.remove("idle-rumble");
+      addSmokePuffs(7, "11%");
+      celebrate("Fizz fuel full!");
+    }
   });
   popArea.appendChild(pump);
 }
 
 function renderCountdown() {
-  makeGarage();
+  const garage = makeGarage();
+  const countdownRing = addElement("countdown-ring");
   const rocket = makeRocket();
   let nextNumber = 5;
   const button = document.createElement("button");
   button.className = "button-big";
   button.type = "button";
   button.textContent = "5";
+  countdownRing.textContent = "5";
   button.addEventListener("click", () => {
     if (nextNumber > 1) {
       nextNumber -= 1;
       button.textContent = String(nextNumber);
+      countdownRing.textContent = String(nextNumber);
+      countdownRing.classList.remove("pulse-now");
+      countdownRing.offsetHeight;
+      countdownRing.classList.add("pulse-now");
+      addClickBurst("50%", "72%", "coral");
       celebrate(`${nextNumber}...`);
       return;
     }
     button.textContent = "Blastoff!";
+    countdownRing.textContent = "Go!";
+    countdownRing.classList.add("launch-ready");
+    garage.classList.add("open");
     rocket.classList.add("lift");
+    addSmokePuffs(9);
     celebrate("Blastoff!");
   });
   popArea.appendChild(button);
@@ -300,7 +384,10 @@ function renderCountdown() {
 
 function renderStars() {
   popArea.classList.add("space");
+  addSparkles(18, "white");
+  addElement("comet");
   const rocket = makeRocket();
+  addElement("rocket-trail", rocket);
   rocket.style.bottom = "6%";
   rocket.style.transform = "translateX(-50%) rotate(18deg)";
 
@@ -311,9 +398,11 @@ function renderStars() {
     star.setAttribute("aria-label", "Catch a star");
     star.style.left = `${10 + ((index * 23) % 75)}%`;
     star.style.top = `${9 + ((index * 17) % 58)}%`;
+    star.style.setProperty("--star-delay", `${index * 0.18}s`);
     star.addEventListener("click", () => {
       if (star.classList.contains("done")) return;
       star.classList.add("done");
+      addClickBurst(star.style.left, star.style.top, "white");
       progress += 1;
       if (progress === 5) celebrate("Star map glowing!");
     });
@@ -323,6 +412,9 @@ function renderStars() {
 
 function renderPlanets() {
   popArea.classList.add("space");
+  addSparkles(16, "white");
+  addElement("orbit orbit-one");
+  addElement("orbit orbit-two");
   const planets = [
     ["Moon", "#d8dde7", "16%", "28%", "82px", false],
     ["Earth", "#4aa3ff", "43%", "52%", "118px", false],
@@ -343,6 +435,11 @@ function renderPlanets() {
     planet.style.color = isMars ? "white" : "#273044";
     planet.addEventListener("click", () => {
       planet.classList.add("spin");
+      window.setTimeout(() => planet.classList.remove("spin"), 480);
+      if (isMars) {
+        if (!popArea.querySelector(".route-line")) addElement("route-line");
+        addClickBurst(left, top, "coral");
+      }
       celebrate(isMars ? "Mars found!" : "Nice planet, but keep looking.");
     });
     popArea.appendChild(planet);
@@ -351,9 +448,16 @@ function renderPlanets() {
 
 function renderFlag() {
   popArea.classList.add("mars");
+  addSparkles(8, "coral");
   const mars = document.createElement("div");
   mars.className = "mars-ball";
   popArea.appendChild(mars);
+  for (let index = 0; index < 10; index += 1) {
+    const rock = addElement("mars-rock");
+    rock.style.left = `${8 + ((index * 19) % 82)}%`;
+    rock.style.bottom = `${6 + ((index * 7) % 30)}%`;
+    rock.style.setProperty("--rock-delay", `${index * 0.16}s`);
+  }
 
   const flag = document.createElement("button");
   flag.className = "flag";
@@ -361,6 +465,8 @@ function renderFlag() {
   flag.setAttribute("aria-label", "Raise the Parker and Pine flag");
   flag.addEventListener("click", () => {
     flag.classList.add("raised");
+    addClickBurst("55%", "38%", "mint");
+    addSmokePuffs(5, "31%");
     celebrate("Flag on Mars!");
   });
   popArea.appendChild(flag);
@@ -368,6 +474,14 @@ function renderFlag() {
 
 function renderFinish() {
   makeGroundScene();
+  addSparkles(14, "gold");
+  ["Johnny Builds to Mars", "More stories soon", "Parker & Pine"].forEach((text, index) => {
+    const story = addElement("floating-story");
+    story.textContent = text;
+    story.style.left = `${10 + index * 28}%`;
+    story.style.top = `${13 + index * 13}%`;
+    story.style.setProperty("--story-delay", `${index * 0.35}s`);
+  });
   const card = document.createElement("button");
   card.className = "home-card";
   card.type = "button";
